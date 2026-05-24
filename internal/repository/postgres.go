@@ -39,7 +39,7 @@ func (p *PostgresRepository) GetByCode(code string) (domain.URL, error) {
 	query := `
 	UPDATE urls SET clicks = clicks + 1
 	WHERE short_code = $1
-	RETURNING original_url
+	RETURNING id, original_url, short_code, clicks, created_at
 	`
 
 	urlDomain := domain.URL{}
