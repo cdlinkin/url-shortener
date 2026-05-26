@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"math/rand"
+	"time"
 
 	"github.com/cdlinkin/url-shortener/internal/domain"
 	"github.com/cdlinkin/url-shortener/internal/repository"
@@ -19,12 +20,12 @@ func NewUrlService(repo repository.Repository) *UrlService {
 }
 
 func generateShortCode() string {
-	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	const alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	const length = 6
 
 	b := make([]byte, length)
 	for i := range b {
-		b[i] = charset[rand.Intn(len(charset))]
+		b[i] = alphabet[rand.Intn(len(alphabet))]
 	}
 	return string(b)
 }
@@ -33,14 +34,33 @@ func (s *UrlService) CreateURLShort(req domain.CreateUrlRequest) (domain.URL, er
 	if err := req.ValidateURLReq(); err != nil {
 		return domain.URL{}, fmt.Errorf("service error: %w", err)
 	}
+	shortCode := generateShortCode()
+	urlModel := domain.URL{
+		OriginalUrl: req.URL,
+		ShortCode:   shortCode,
+		CreatedAt:   time.Now(),
+	}
+	urlDomain, err := s.repo.CreateURLShort(urlModel)
+	if err != nil {
+		return domain.URL{}, fmt.Errorf("service error: %w", err)
+	}
+	return urlDomain, nil
 }
 
-func (s *UrlService) GetByCode(code string) (domain.Url, error) {
-	return s.repo.GetByCode(code)
+func (s *UrlService) GetByCode(code string) (domain.URL, error) {
+	urlDomain, err := s.repo.GetByCode(code)
+	if err != nil {
+		return domain.URL{}, fmt.Errorf("service error: %w", err)
+	}
+	return urlDomain, nil
 }
 
 func (s *UrlService) GetCodeStats(code string) (domain.StatsResponse, error) {
-	return s.repo.GetCodeStats(code)
+	urlStatsDomain, err := s.repo.GetCodeStats(code)
+	if err != nil {
+		return domain.StatsResponse{}, fmt.Errorf("service error: %w", err)
+	}
+	return urlStatsDomain, nil
 }
 
 func (s *UrlService) Delete(code string) error {
