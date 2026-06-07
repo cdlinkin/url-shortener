@@ -24,7 +24,7 @@ func NewRedisCache(addr string) *RedisCache {
 func (r *RedisCache) Get(ctx context.Context, key string) (string, error) {
 	val, err := r.client.Get(ctx, key).Result()
 	if err != nil {
-		return "", fmt.Errorf("error: %w", err)
+		return "", err
 	}
 	return val, nil
 }

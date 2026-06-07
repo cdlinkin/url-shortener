@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"strings"
@@ -42,8 +43,8 @@ func (h *UrlHandler) CreateURLShort(w http.ResponseWriter, r *http.Request) {
 
 func (h *UrlHandler) GetByCode(w http.ResponseWriter, r *http.Request) {
 	code := r.PathValue("code")
-
-	urlDomain, err := h.service.GetByCode(code)
+	ctx := context.Background()
+	urlDomain, err := h.service.GetByCode(ctx, code)
 	if err != nil {
 		writeError(w, http.StatusNotFound, "url not found")
 		return

@@ -1,21 +1,25 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"time"
 
+	"github.com/cdlinkin/url-shortener/internal/cache"
 	"github.com/cdlinkin/url-shortener/internal/domain"
 	"github.com/cdlinkin/url-shortener/internal/repository"
 )
 
 type UrlService struct {
-	repo repository.Repository
+	repo  repository.Repository
+	redis *cache.RedisCache
 }
 
-func NewUrlService(repo repository.Repository) *UrlService {
+func NewUrlService(repo repository.Repository, redis *cache.RedisCache) *UrlService {
 	return &UrlService{
-		repo: repo,
+		repo:  repo,
+		redis: redis,
 	}
 }
 
@@ -47,7 +51,8 @@ func (s *UrlService) CreateURLShort(req domain.CreateUrlRequest) (domain.URL, er
 	return urlDomain, nil
 }
 
-func (s *UrlService) GetByCode(code string) (domain.URL, error) {
+func (s *UrlService) GetByCode(ctx context.Context, code string) (domain.URL, error) {
+	s.redis.Get(ctx, code)
 	urlDomain, err := s.repo.GetByCode(code)
 	if err != nil {
 		return domain.URL{}, fmt.Errorf("service error: %w", err)

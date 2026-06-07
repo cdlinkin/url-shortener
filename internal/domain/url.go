@@ -7,12 +7,12 @@ import (
 )
 
 type URL struct {
-	ID          int
-	OriginalUrl string
-	ShortCode   string
-	Clicks      int
+	ID          int    `db:"id"`
+	OriginalUrl string `db:"original_url"`
+	ShortCode   string `db:"short_code"`
+	Clicks      int    `db:"clicks"`
 
-	CreatedAt time.Time
+	CreatedAt time.Time `db:"created_at"`
 }
 
 type CreateUrlRequest struct {
@@ -25,10 +25,10 @@ type URLResponse struct {
 }
 
 type StatsResponse struct {
-	URL       string    `json:"url"`
-	ShortCode string    `json:"short_code"`
-	Clicks    int       `json:"clicks"`
-	CreatedAt time.Time `json:"created_at"`
+	URL       string    `json:"url" db:"original_url"`
+	ShortCode string    `json:"short_code" db:"short_code"`
+	Clicks    int       `json:"clicks" db:"clicks"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
 }
 
 func (u *URL) ValidateURL() error {
